@@ -30,9 +30,11 @@ public class Producer extends Thread {
     private final Boolean isAsync;
 
     public Producer(String topic, Boolean isAsync) {
+        // 构造函数, 初始化一些链接参数
         Properties props = new Properties();
         props.put("bootstrap.servers", "localhost:9092");
         props.put("client.id", "DemoProducer");
+        // 指定序列化类
         props.put("key.serializer", "org.apache.kafka.common.serialization.IntegerSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producer = new KafkaProducer<>(props);
@@ -42,14 +44,18 @@ public class Producer extends Thread {
 
     public void run() {
         int messageNo = 1;
+        // 一直发送消息
         while (true) {
             String messageStr = "Message_" + messageNo;
             long startTime = System.currentTimeMillis();
             if (isAsync) { // Send asynchronously
+                // 异步发送, 消息的响应交给回调函数处理
+                // 性能比较好, 生成环境一般使用异步发送的方式
                 producer.send(new ProducerRecord<>(topic,
                     messageNo,
                     messageStr), new DemoCallBack(startTime, messageNo, messageStr));
             } else { // Send synchronously
+                // 同步
                 try {
                     producer.send(new ProducerRecord<>(topic,
                         messageNo,
